@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Favorites</title>
+    <style>
+        /* Base Styles */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .favorites-container {
+            padding: 40px 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .fav-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .fav-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
+
+        /* Navigation Buttons Area */
+        .fav-actions-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-link {
+            text-decoration: none;
+            color: #444;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.3s;
+        }
+
+        .btn-link:hover { color: #000; }
+
+        .clear-all-btn {
+            background: #ff5e5e;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .clear-all-btn:hover { background: #d41d1d; }
+
+        /* The Grid */
+        #fav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        /* Glassmorphism Card */
+        .fav-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fav-card:hover { transform: translateY(-5px); }
+
+        .remove-fav {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #ff5e5e;
+        }
+
+        .fav-card img {
+            width: 100%;
+            height: 200px;
+            border-radius: 15px;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+
+        .fav-info h3 { margin: 10px 0; font-size: 1.2rem; }
+        .price { font-weight: bold; color: #444; margin-bottom: 15px; }
+
+        .add-to-cart-btn {
+            width: 100%;
+            padding: 12px;
+            background: #222;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: auto;
+        }
+
+        /* Bottom Checkout Bar */
+        .checkout-footer {
+            margin-top: 50px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 20px;
+            display: none; /* Hidden if empty */
+        }
+
+        .proceed-btn {
+            background: #28a745;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: inline-block;
+            transition: 0.3s;
+        }
+
+        .proceed-btn:hover { background: #218838; transform: scale(1.05); }
+
+        .empty-msg {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <section class="favorites-container">
+        <div class="fav-header">
+            <h2>My Favorites</h2>
+            <p>You have <span id="fav-count">0</span> items saved</p>
+        </div>
+
+        <div class="fav-actions-top">
+            <a href="home.html" class="btn-link">← Back to Shopping</a>
+            <button class="clear-all-btn" onclick="clearAllFavorites()">Remove All</button>
+        </div>
+
+        <div id="fav-grid">
+            </div>
+
+        <div class="checkout-footer" id="checkout-footer">
+            <p style="margin-bottom: 15px;">Ready to purchase your favorites?</p>
+            <a href="cart.html" class="proceed-btn">Proceed to Cart →</a>
+        </div>
+    </section>
+
+    <script>
+        const favGrid = document.getElementById('fav-grid');
+const favCountLabel = document.getElementById('fav-count');
+const checkoutFooter = document.getElementById('checkout-footer');
+
+function loadFavorites() {
+    const favorites = JSON.parse(localStorage.getItem('swiftFavorites')) || [];
+    favGrid.innerHTML = ''; 
+    
+    favCountLabel.textContent = favorites.length;
+
+    if (favorites.length === 0) {
+        // Updated: Removed the "find something you love" link
+        favGrid.innerHTML = `<div class="empty-msg">Your favorites list is empty!</div>`;
+        checkoutFooter.style.display = 'none';
+        return;
+    }
+
+    checkoutFooter.style.display = 'block';
+
+    favorites.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'fav-card';
+        card.innerHTML = `
+            <div class="remove-fav" onclick="removeSingleItem(${index})">&times;</div>
+            <img src="${item.image}" alt="${item.name}">
+            <div class="fav-info">
+                <h3>${item.name}</h3>
+                <p class="price">₱${item.price}</p>
+                <button class="add-to-cart-btn" onclick="moveToCart(${index})">Move to Cart</button>
+            </div>
+        `;
+        favGrid.appendChild(card);
+    });
+}
+
+function removeSingleItem(index) {
+    let favorites = JSON.parse(localStorage.getItem('swiftFavorites')) || [];
+    favorites.splice(index, 1);
+    localStorage.setItem('swiftFavorites', JSON.stringify(favorites));
+    loadFavorites();
+}
+
+function clearAllFavorites() {
+    if(confirm("Are you sure you want to clear your entire favorites list?")) {
+        localStorage.removeItem('swiftFavorites');
+        loadFavorites();
+    }
+}
+
+function moveToCart(index) {
+    let favorites = JSON.parse(localStorage.getItem('swiftFavorites')) || [];
+    
+    // IMPORTANT: Check your Cart/Order page. 
+    // If that page uses a different name, change 'cart' below to match it.
+    let cart = JSON.parse(localStorage.getItem('cart')) || []; 
+
+    const itemToAdd = favorites[index];
+
+    // Optional: Check if item is already in cart to prevent duplicates
+    const isAlreadyInCart = cart.some(cartItem => cartItem.name === itemToAdd.name);
+    
+    if (!isAlreadyInCart) {
+        cart.push(itemToAdd);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        
+        // Remove from favorites after moving
+        favorites.splice(index, 1);
+        localStorage.setItem('swiftFavorites', JSON.stringify(favorites));
+        
+        alert(`${itemToAdd.name} moved to your order!`);
+    } else {
+        alert("This item is already in your cart!");
+        // Still remove from favorites since it's already in the cart
+        favorites.splice(index, 1);
+        localStorage.setItem('swiftFavorites', JSON.stringify(favorites));
+    }
+
+    loadFavorites();
+}
+
+// Run on page load
+loadFavorites();
+    </script>
+</body>
+</html>

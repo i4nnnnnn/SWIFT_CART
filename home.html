@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftCart - Premium Shopping</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 0;
+        }
+
+        /* --- DASHBOARD WRAPPER --- */
+        .page-wrapper {
+            width: 1440px; 
+            background-color: white;
+            border-radius: 40px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* --- GLASSMORPHISM LOGIN OVERLAY --- */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+
+        .glass-login-box {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 40px;
+            border-radius: 30px;
+            width: 420px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            text-align: center;
+            color: #1e293b;
+        }
+
+        .glass-login-box h2 { color: #4f46e5; margin-bottom: 10px; font-weight: 800; }
+        .glass-login-box p.subtitle { font-size: 14px; margin-bottom: 25px; opacity: 0.8; }
+        
+        .glass-login-box input {
+            width: 100%;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.4);
+            outline: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        
+        .glass-login-box input:focus {
+            background: rgba(255, 255, 255, 0.7);
+            border-color: #6366f1;
+        }
+
+        .login-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0 20px 0;
+            font-size: 12px;
+        }
+
+        .login-options a {
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .signup-text {
+            margin-top: 20px;
+            font-size: 13px;
+        }
+
+        .signup-text a {
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background: white;
+            padding: 25px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #f8fafc;
+        }
+
+        .logo { font-size: 28px; font-weight: 800; color: #6366f1; letter-spacing: -1px; }
+        
+        nav { display: flex; align-items: center; }
+        nav a { text-decoration: none; color: #666; font-size: 15px; font-weight: 500; margin-left: 35px; transition: 0.3s; position: relative; }
+        nav a:hover { color: #6366f1; }
+
+        #fav-count, #cart-count {
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            position: absolute;
+            top: -10px;
+            right: -15px;
+            display: none; 
+        }
+        
+        #cart-count { background: #6366f1; }
+
+        .header-right { display: flex; align-items: center; gap: 20px; }
+
+        .search-container {
+            background: #f1f5f9;
+            padding: 8px 18px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            width: 220px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .search-container input {
+            border: none;
+            background: transparent;
+            outline: none;
+            margin-left: 10px;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        .login-btn {
+            border: 1.5px solid #6366f1;
+            padding: 10px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            color: #6366f1;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .login-btn:hover { background: #6366f1; color: white; }
+
+        /* --- HERO SECTION --- */
+        .main-content { padding: 20px 60px 40px 60px; }
+
+        .hero-banner {
+            background: linear-gradient(135deg, #4f46e5 0%, #a855f7 100%); 
+            width: 100%;
+            height: 550px;
+            border-radius: 40px;
+            padding: 0 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center; 
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-text { max-width: 550px; color: white; z-index: 20; }
+        .hero-title { font-size: 62px; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
+        
+        .hero-title span { 
+            background: linear-gradient(to right, #34d399, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle { margin-bottom: 35px; opacity: 0.8; font-size: 17px; line-height: 1.6; }
+
+        .stats-area { display: flex; align-items: center; gap: 30px; }
+        .stat-block { display: flex; flex-direction: column; }
+        .stat-number { font-size: 22px; font-weight: 800; color: white; }
+        .stat-label { font-size: 11px; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
+
+        .explore-btn { 
+            background: #ffffff; border: none; padding: 18px 40px; border-radius: 16px; 
+            font-weight: 700; color: #4f46e5; font-size: 16px; cursor: pointer; transition: 0.3s;
+        }
+
+        .user-photo-container { width: 45%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
+        .floating-photo { width: 90%; z-index: 10; filter: drop-shadow(0 30px 50px rgba(0,0,0,0.5)); animation: floatImg 6s ease-in-out infinite; }
+
+        @keyframes floatImg { 0%, 100% { transform: translateY(0px) rotate(3deg); } 50% { transform: translateY(-20px) rotate(3deg); } }
+
+        /* --- GLASS CARDS --- */
+        .glass-card {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 20px;
+            z-index: 30;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: floatGlass 5s ease-in-out infinite;
+        }
+
+        .kyle-badge { top: 15%; right: -20px; min-width: 200px; color: white; }
+        .discount-badge { bottom: 15%; left: -40px; display: flex; align-items: center; gap: 15px; animation-delay: 1s; }
+
+        .stars-row { color: #fbbf24; font-size: 12px; margin-bottom: 5px; }
+        .save-circle { 
+            width: 60px; height: 60px; background: #6366f1; border-radius: 50%; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: white; font-weight: 800;
+        }
+
+        @keyframes floatGlass { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+
+        /* --- FLASH SALE --- */
+        .flash-sale { 
+            background: #f5f3ff; 
+            border-radius: 40px; 
+            margin: 0 60px 40px 60px; 
+            border: 2px solid #ddd6fe; 
+            padding: 40px; 
+        }
+        
+        .section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
+        .countdown-timer { background: #7c3aed; color: white; padding: 10px 20px; border-radius: 12px; font-weight: 700; min-width: 120px; text-align: center; }
+
+        .slider-wrapper {
+            overflow-x: auto;
+            padding-bottom: 20px;
+            display: flex;
+            gap: 25px;
+            scroll-behavior: smooth;
+        }
+
+        .slider-wrapper::-webkit-scrollbar { height: 8px; }
+        .slider-wrapper::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        .slider-wrapper::-webkit-scrollbar-thumb { background: #7c3aed; border-radius: 10px; }
+
+        .product-card { 
+            min-width: 280px; 
+            background: white; 
+            border-radius: 25px; 
+            padding: 20px; 
+            border: 1px solid #f1f5f9; 
+            transition: 0.4s; 
+            position: relative;
+            overflow: hidden;
+        }
+        .product-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(99, 102, 241, 0.1); border-color: #6366f1; }
+
+        .sale-tag { position: absolute; top: 15px; left: 15px; background: #7c3aed; color: white; padding: 5px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; z-index: 5; }
+        .img-container { width: 100%; height: 180px; background: #f8fafc; border-radius: 20px; overflow: hidden; margin-bottom: 15px; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        .price { font-size: 20px; font-weight: 800; color: #1e293b; }
+        .old-price { text-decoration: line-through; color: #cbd5e1; font-size: 14px; margin-left: 5px; }
+        
+        .add-btn { width: 42px; height: 42px; border-radius: 12px; border: none; background: #f1f5f9; color: #6366f1; font-size: 20px; cursor: pointer; transition: 0.2s; }
+        .add-btn:hover { background: #6366f1; color: white; }
+
+        /* --- TRENDING CONTAINER --- */
+        .trending-container {
+            border: 1px solid #e2e8f0;
+            border-radius: 35px;
+            margin: 0 60px 60px 60px;
+            padding: 40px;
+            background: #fafafa;
+        }
+
+        .category-nav { display: flex; gap: 12px; margin-bottom: 35px; }
+        .cat-pill { padding: 10px 22px; border-radius: 20px; background: #fff; cursor: pointer; font-weight: 600; color: #64748b; transition: 0.3s; border: 1px solid #e2e8f0; }
+        .cat-pill.active { background: #6366f1; color: white; border-color: #6366f1; }
+
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 30px; }
+        
+        .wishlist-icon { 
+            position: absolute; 
+            top: 15px; 
+            right: 15px; 
+            color: #cbd5e1; 
+            cursor: pointer; 
+            font-size: 22px; 
+            transition: 0.3s; 
+            user-select: none;
+            z-index: 5;
+        }
+        .wishlist-icon.active {
+            color: #ef4444;
+            transform: scale(1.2);
+        }
+
+        /* --- TOAST NOTIFICATION --- */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e293b;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2000;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="glass-login-box">
+            <h2>Welcome Back</h2>
+            <p class="subtitle">Please enter your details to sign in</p>
+            
+            <input type="email" placeholder="Email Address">
+            <input type="password" placeholder="Password">
+            
+            <div class="login-options">
+                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                    <input type="checkbox" style="width: auto; margin: 0;"> Remember me
+                </label>
+                <a href="#">Forgot Password?</a>
+            </div>
+
+            <button class="explore-btn" style="width: 100%; margin-top: 10px; background: #6366f1; color: white;" onclick="toggleLogin()">Sign In</button>
+            
+            <div class="signup-text">
+                Don't have an account? <a href="#">Sign Up</a>
+            </div>
+
+            <p style="font-size: 12px; margin-top: 25px; cursor: pointer; opacity: 0.6;" onclick="toggleLogin()">Close Window</p>
+        </div>
+    </div>
+
+    <div id="toast">Item added to cart! 🛒</div>
+
+    <div class="page-wrapper">
+        <header>
+            <div class="logo">SwiftCart.</div>
+            <nav>
+                <a href="#trending">Trending</a>
+                <a href="cart.html">My Cart<span id="cart-count">0</span></a>
+                <a href="#flash-sale-section"> Flash Sale </a>
+                <a href="fav.html"> Favorites <span id="fav-count">0</span></a>
+            </nav>
+
+            <div class="header-right">
+                <div class="search-container">
+                    <span>🔍</span>
+                    <input type="text" id="product-search" placeholder="Search products...">
+                </div>
+                <div class="login-btn" onclick="toggleLogin()">Log In</div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="hero-banner">
+                <div class="hero-text">
+                    <h1 class="hero-title">Shopping: The <br> <span>Extraordinary</span></h1>
+                    <p class="hero-subtitle">Premium styles and next-gen tech delivered with unmatched speed. Experience the future of retail today.</p>
+                    <div class="stats-area">
+                        <button class="explore-btn">Explore Now</button>
+                        <div class="stat-block"><span class="stat-number">1B+</span><span class="stat-label">Users</span></div>
+                        <div class="stat-block"><span class="stat-number">400K+</span><span class="stat-label">Daily Ship</span></div>
+                    </div>
+                </div>
+                <div class="user-photo-container">
+                    <div class="glass-card kyle-badge">
+                        <div class="stars-row">★★★★★</div>
+                        <span style="font-weight: 700; display: block;">Kyle G. Spot</span>
+                        <p style="font-size: 11px; opacity: 0.8; margin-top: 4px;">"Fastest delivery in the city!"</p>
+                    </div>
+                    <div class="glass-card discount-badge">
+                        <div class="save-circle">67%</div>
+                        <div>
+                            <span style="color: white; font-weight: 700; font-size: 14px; display: block;">SAVE BIG</span>
+                            <span style="color: rgba(255,255,255,0.6); font-size: 11px;">Limited Offer</span>
+                        </div>
+                    </div>
+                    <img src="HAHA.png" alt="Hero" class="floating-photo">
+                </div>
+            </div>
+        </main>
+
+        <section class="flash-sale" id="flash-sale-section">
+            <div class="section-header">
+                <div>
+                    <h2 style="font-size: 32px; color: #7c3aed;">🔥 Flash Sale </h2>
+                    <p style="color: #64748b;">Scroll to see more deals!</p>
+                </div>
+                <div class="countdown-timer" id="timer">00 : 00 : 00</div>
+            </div>
+
+            <div class="slider-wrapper">
+                <div class="product-card">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="sale-tag">-40%</div>
+                    <div class="img-container"><img src="block.jpg" alt="block"></div>
+                    <div class="product-info">
+                        <h4> Hollow Block </h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                            <span class="price" style="color: #7c3aed;"> ₱180.00 <span class="old-price"> ₱450.00 </span></span>
+                            <button class="add-btn cart-trigger" style="background: #7c3aed; color: white;">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="sale-tag"> -25% </div>
+                    <div class="img-container"><img src="rose.jpg" alt="rose"></div>
+                    <div class="product-info">
+                        <h4> Mini Rose Humidifier </h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                            <span class="price" style="color: #7c3aed;"> ₱143.00 <span class="old-price"> ₱570.00 </span></span>
+                            <button class="add-btn cart-trigger" style="background: #7c3aed; color: white;">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="sale-tag"> -10% </div>
+                    <div class="img-container"><img src="bremod.jpg" alt="bremod"></div>
+                    <div class="product-info">
+                        <h4> Bremod Cocoa Shampoo </h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                            <span class="price" style="color: #7c3aed;"> ₱112.00 <span class="old-price"> ₱1,120.00 </span></span>
+                            <button class="add-btn cart-trigger" style="background: #7c3aed; color: white;">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="sale-tag"> -50% </div>
+                    <div class="img-container"><img src="figure.jpg" alt="figure"></div>
+                    <div class="product-info">
+                        <h4> Disney Twisted Wonderland - Figuarts </h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                            <span class="price" style="color: #7c3aed;"> ₱641.00 <span class="old-price"> ₱1,282.00 </span></span>
+                            <button class="add-btn cart-trigger" style="background: #7c3aed; color: white;">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="sale-tag">-30%</div>
+                    <div class="img-container"><img src="hirono.jpg" alt="hirono"></div>
+                    <div class="product-info">
+                        <h4> POP MART - Hirono Little Mischief Series Figurine </h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                            <span class="price" style="color: #7c3aed;"> ₱267.00 <span class="old-price"> ₱890.00 </span></span>
+                            <button class="add-btn cart-trigger" style="background: #7c3aed; color: white;">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="trending-container" id="trending">
+            <div class="section-header">
+                <div>
+                    <h2 style="font-size: 32px;">✨ Trending Now</h2>
+                    <p style="color: #64748b;">Most popular picks this week</p>
+                </div>
+                <a href="#" style="color: #6366f1; font-weight: 600; text-decoration: none;">View All →</a>
+            </div>
+            <div class="category-nav">
+                <div class="cat-pill active" data-category="all">All Items</div>
+                <div class="cat-pill" data-category="toys">Toys</div>
+                <div class="cat-pill" data-category="gadgets">Gadgets</div>
+                <div class="cat-pill" data-category="lifestyle">Lifestyle</div>
+            </div>
+            <div class="products-grid" id="products-grid">
+                <div class="product-card" data-category="toys">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="img-container"><img src="alnst.jpg" alt="alnst"></div>
+                    <div class="product-info">
+                        <h4> Jual PO - Alien Stage ALNST Series Figure Blind Box </h4>
+                        <p class="cat-label" style="color: #888; font-size: 13px; margin: 5px 0 15px 0;"> Toys </p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="price"> ₱439.00 </span>
+                            <button class="add-btn cart-trigger">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card" data-category="gadgets">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="img-container"><img src="head.jpg" alt="head"></div>
+                    <div class="product-info">
+                        <h4> Lenovo Original Thinkplus TH10 Stereo Wireless Headphones Bluetooth </h4>
+                        <p class="cat-label" style="color: #888; font-size: 13px; margin: 5px 0 15px 0;"> Gadgets </p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="price">  ₱780.00 </span>
+                            <button class="add-btn cart-trigger">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card" data-category="toys">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="img-container"><img src="labubu.jpeg" alt="labubu"></div>
+                    <div class="product-info">
+                        <h4> POP MART - Labubu Doll, The Monsters Delightful Macaron Plush Doll Series </h4>
+                        <p class="cat-label" style="color: #888; font-size: 13px; margin: 5px 0 15px 0;">Toys</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="price">  ₱320.00 </span>
+                            <button class="add-btn cart-trigger">+</button>
+                        </div>
+                    </div>
+                </div>
+                 <div class="product-card" data-category="gadgets">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="img-container"><img src="fan.jpg" alt="fan"></div>
+                    <div class="product-info">
+                        <h4> Goojodoq Mini Fan | Rechargeable Handheld Fan </h4>
+                        <p class="cat-label" style="color: #888; font-size: 13px; margin: 5px 0 15px 0;">Gadgets</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="price">  ₱899.00 </span>
+                            <button class="add-btn cart-trigger">+</button>
+                        </div>
+                    </div>
+                </div>
+                 <div class="product-card" data-category="lifestyle">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="img-container"><img src="serum.jpg" alt="serum"></div>
+                    <div class="product-info">
+                        <h4> Sakura Glow Serum Milk Hyaluron Body Lotion </h4>
+                        <p class="cat-label" style="color: #888; font-size: 13px; margin: 5px 0 15px 0;">Lifestyle</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="price"> ₱573.00 </span>
+                            <button class="add-btn cart-trigger">+</button>
+                        </div>
+                    </div>
+                </div>
+                 <div class="product-card" data-category="toys">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="img-container"><img src="doh.jpg" alt="doh"></div>
+                    <div class="product-info">
+                        <h4> Play-Doh My Little Pony Make 'N Style Ponies Playset </h4>
+                        <p class="cat-label" style="color: #888; font-size: 13px; margin: 5px 0 15px 0;">Toys</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="price">  ₱660.00 </span>
+                            <button class="add-btn cart-trigger">+</button>
+                        </div>
+                    </div>
+                </div>
+                 <div class="product-card" data-category="gadgets">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="img-container"><img src="jbl.jpg" alt="jbl"></div>
+                    <div class="product-info">
+                        <h4> JBL Flip 6 Wireless Portable Bluetooth Speaker Pro Sound Up to 12 Hours Playtime, IP67 Waterproof </h4>
+                        <p class="cat-label" style="color: #888; font-size: 13px; margin: 5px 0 15px 0;">Gadgets</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="price">  ₱590.00 </span>
+                            <button class="add-btn cart-trigger">+</button>
+                        </div>
+                    </div>
+                </div>
+                 <div class="product-card" data-category="lifestyle">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="img-container"><img src="damit.jpg" alt="damit"></div>
+                    <div class="product-info">
+                        <h4> Leisei - French Maid Tablier Lolita Cosplay </h4>
+                        <p class="cat-label" style="color: #888; font-size: 13px; margin: 5px 0 15px 0;">Lifestyle</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="price">  ₱1,120.00 </span>
+                            <button class="add-btn cart-trigger">+</button>
+                        </div>
+                    </div>
+                </div>
+                 <div class="product-card" data-category="toys">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="img-container"><img src="plush.jpg" alt="Plush"></div>
+                    <div class="product-info">
+                        <h4> 37 cm Kawaii Kuromi Cinnamoroll Sofa Plushie Pillow Miniso Sanrio Stuff Toys </h4>
+                        <p class="cat-label" style="color: #888; font-size: 13px; margin: 5px 0 15px 0;">Toys</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="price">  ₱499.00 </span>
+                            <button class="add-btn cart-trigger">+</button>
+                        </div>
+                    </div>
+                </div>
+                 <div class="product-card" data-category="lifestyle">
+                    <span class="wishlist-icon">❤</span>
+                    <div class="img-container"><img src="zen.jpg" alt="Zen Candle"></div>
+                    <div class="product-info">
+                        <h4> Zen Candles Relaxation Candles Crystals and Herbs </h4>
+                        <p class="cat-label" style="color: #888; font-size: 13px; margin: 5px 0 15px 0;">Lifestyle</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="price">  ₱320.00 </span>
+                            <button class="add-btn cart-trigger">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+  <script>
+    /* --- LOGIN OVERLAY TOGGLE --- */
+    function toggleLogin() {
+        const overlay = document.getElementById('login-overlay');
+        overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    /* --- WISHLIST LOGIC --- */
+   /* --- FUNCTIONAL WISHLIST LOGIC (Persistent like Cart) --- */
+const favCountLabel = document.getElementById('fav-count');
+
+// 1. Load existing favorites from storage or start empty
+let favorites = JSON.parse(localStorage.getItem('swiftFavorites')) || [];
+
+// 2. Function to update the UI badge and heart colors
+function updateFavoritesUI() {
+    favCountLabel.textContent = favorites.length;
+    favCountLabel.style.display = favorites.length > 0 ? 'block' : 'none';
+
+    // This part makes sure hearts STAY red if they are in the favorites list
+    document.querySelectorAll('.product-card').forEach(card => {
+        const productName = card.querySelector('h4').textContent.trim();
+        const heart = card.querySelector('.wishlist-icon');
+        
+        const isFavorited = favorites.some(item => item.name === productName);
+        if (isFavorited) {
+            heart.classList.add('active');
+        } else {
+            heart.classList.remove('active');
+        }
+    });
+}
+
+// Initialize UI on page load
+updateFavoritesUI();
+
+document.querySelectorAll('.wishlist-icon').forEach(heart => {
+    heart.addEventListener('click', (e) => {
+        const card = e.target.closest('.product-card');
+        const productName = card.querySelector('h4').textContent.trim();
+        const productPrice = card.querySelector('.price').innerText.split('₱')[1].trim();
+        const productImage = card.querySelector('img').src;
+
+        const product = {
+            name: productName,
+            price: productPrice,
+            image: productImage
+        };
+
+        // Check if item is already favorited
+        const existingIndex = favorites.findIndex(item => item.name === product.name);
+
+        if (existingIndex > -1) {
+            // If it exists, remove it (Un-heart)
+            favorites.splice(existingIndex, 1);
+        } else {
+            // If it doesn't exist, add it (Heart)
+            favorites.push(product);
+        }
+
+        // Save to localStorage & Update UI
+        localStorage.setItem('swiftFavorites', JSON.stringify(favorites));
+        updateFavoritesUI();
+    });
+});
+    /* --- UPDATED CART LOGIC (Persistent) --- */
+    const cartCountLabel = document.getElementById('cart-count');
+    const toast = document.getElementById('toast');
+
+    // 1. Load existing cart from storage or start empty
+    let cart = JSON.parse(localStorage.getItem('swiftCart')) || [];
+
+    // 2. Function to update the UI badge count
+    function updateCartUI() {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        cartCountLabel.textContent = totalItems;
+        cartCountLabel.style.display = totalItems > 0 ? 'block' : 'none';
+    }
+
+    // Initialize UI on page load
+    updateCartUI();
+
+    document.querySelectorAll('.cart-trigger').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Find the closest product card to get info
+            const card = e.target.closest('.product-card');
+            const productName = card.querySelector('h4').textContent.trim();
+            const productPrice = card.querySelector('.price').innerText.split('₱')[1].trim();
+            const productImage = card.querySelector('img').src;
+
+            const product = {
+                id: productName, // Using name as a unique ID
+                name: productName,
+                price: parseFloat(productPrice.replace(',', '')),
+                image: productImage,
+                quantity: 1
+            };
+
+            // Check if item already in cart
+            const existingIndex = cart.findIndex(item => item.id === product.id);
+
+            if (existingIndex > -1) {
+                cart[existingIndex].quantity += 1;
+            } else {
+                cart.push(product);
+            }
+
+            // Save to localStorage & Update UI
+            localStorage.setItem('swiftCart', JSON.stringify(cart));
+            updateCartUI();
+
+            // Show Toast
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        });
+    });
+
+    /* --- CATEGORY FILTER & SEARCH LOGIC --- */
+    const searchInput = document.getElementById('product-search');
+    const pills = document.querySelectorAll('.cat-pill');
+    const allProducts = document.querySelectorAll('.product-card');
+
+    function filterProducts() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const activePill = document.querySelector('.cat-pill.active');
+        const activeCat = activePill ? activePill.getAttribute('data-category') : 'all';
+
+        allProducts.forEach(product => {
+            const titleElement = product.querySelector('h4');
+            const title = titleElement ? titleElement.textContent.toLowerCase() : "";
+            const productCat = product.getAttribute('data-category');
+            
+            const matchesCat = (activeCat === 'all' || productCat === activeCat || !productCat);
+            const matchesSearch = title.includes(searchTerm);
+
+            if (matchesCat && matchesSearch) {
+                product.style.display = 'block';
+            } else {
+                product.style.display = 'none';
+            }
+        });
+    }
+
+    searchInput.addEventListener('input', filterProducts);
+
+    pills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            pills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            filterProducts();
+        });
+    });
+</script>
