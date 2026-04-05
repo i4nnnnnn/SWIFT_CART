@@ -124,7 +124,7 @@
             background: rgba(255, 255, 255, 0.5);
             padding: 20px;
             border-radius: 20px;
-            display: none; /* Hidden if empty */
+            display: none; 
         }
 
         .proceed-btn {
@@ -163,8 +163,7 @@
             <button class="clear-all-btn" onclick="clearAllFavorites()">Remove All</button>
         </div>
 
-        <div id="fav-grid">
-            </div>
+        <div id="fav-grid"></div>
 
         <div class="checkout-footer" id="checkout-footer">
             <p style="margin-bottom: 15px;">Ready to purchase your favorites?</p>
@@ -174,87 +173,86 @@
 
     <script>
         const favGrid = document.getElementById('fav-grid');
-const favCountLabel = document.getElementById('fav-count');
-const checkoutFooter = document.getElementById('checkout-footer');
+        const favCountLabel = document.getElementById('fav-count');
+        const checkoutFooter = document.getElementById('checkout-footer');
 
-function loadFavorites() {
-    const favorites = JSON.parse(localStorage.getItem('swiftFavorites')) || [];
-    favGrid.innerHTML = ''; 
-    
-    favCountLabel.textContent = favorites.length;
+        function loadFavorites() {
+            const favorites = JSON.parse(localStorage.getItem('swiftFavorites')) || [];
+            favGrid.innerHTML = ''; 
+            
+            favCountLabel.textContent = favorites.length;
 
-    if (favorites.length === 0) {
-        // Updated: Removed the "find something you love" link
-        favGrid.innerHTML = `<div class="empty-msg">Your favorites list is empty!</div>`;
-        checkoutFooter.style.display = 'none';
-        return;
-    }
+            if (favorites.length === 0) {
+                favGrid.innerHTML = `<div class="empty-msg">Your favorites list is empty!</div>`;
+                checkoutFooter.style.display = 'none';
+                return;
+            }
 
-    checkoutFooter.style.display = 'block';
+            checkoutFooter.style.display = 'block';
 
-    favorites.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = 'fav-card';
-        card.innerHTML = `
-            <div class="remove-fav" onclick="removeSingleItem(${index})">&times;</div>
-            <img src="${item.image}" alt="${item.name}">
-            <div class="fav-info">
-                <h3>${item.name}</h3>
-                <p class="price">₱${item.price}</p>
-                <button class="add-to-cart-btn" onclick="moveToCart(${index})">Move to Cart</button>
-            </div>
-        `;
-        favGrid.appendChild(card);
-    });
-}
+            favorites.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'fav-card';
+                card.innerHTML = `
+                    <div class="remove-fav" onclick="removeSingleItem(${index})">&times;</div>
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="fav-info">
+                        <h3>${item.name}</h3>
+                        <p class="price">₱${item.price.toLocaleString()}</p>
+                        <button class="add-to-cart-btn" onclick="moveToCart(${index})">Move to Cart</button>
+                    </div>
+                `;
+                favGrid.appendChild(card);
+            });
+        }
 
-function removeSingleItem(index) {
-    let favorites = JSON.parse(localStorage.getItem('swiftFavorites')) || [];
-    favorites.splice(index, 1);
-    localStorage.setItem('swiftFavorites', JSON.stringify(favorites));
-    loadFavorites();
-}
+        function removeSingleItem(index) {
+            let favorites = JSON.parse(localStorage.getItem('swiftFavorites')) || [];
+            favorites.splice(index, 1);
+            localStorage.setItem('swiftFavorites', JSON.stringify(favorites));
+            loadFavorites();
+        }
 
-function clearAllFavorites() {
-    if(confirm("Are you sure you want to clear your entire favorites list?")) {
-        localStorage.removeItem('swiftFavorites');
+        function clearAllFavorites() {
+            if(confirm("Are you sure you want to clear your entire favorites list?")) {
+                localStorage.removeItem('swiftFavorites');
+                loadFavorites();
+            }
+        }
+
+        function moveToCart(index) {
+            // Get data from local storage
+            let favorites = JSON.parse(localStorage.getItem('swiftFavorites')) || [];
+            // Use 'swiftCart' to match your cart.html
+            let cart = JSON.parse(localStorage.getItem('swiftCart')) || []; 
+
+            const itemToAdd = favorites[index];
+
+            // Check if item already exists in the cart bag
+            const existingItem = cart.find(cartItem => cartItem.name === itemToAdd.name);
+            
+            if (existingItem) {
+                // If exists, just increment quantity
+                existingItem.quantity = (existingItem.quantity || 1) + 1;
+            } else {
+                // If new, set initial quantity to 1 (Cart page needs this for the math!)
+                itemToAdd.quantity = 1; 
+                cart.push(itemToAdd);
+            }
+
+            // Save back to 'swiftCart'
+            localStorage.setItem('swiftCart', JSON.stringify(cart));
+            
+            // Remove from 'swiftFavorites'
+            favorites.splice(index, 1);
+            localStorage.setItem('swiftFavorites', JSON.stringify(favorites));
+            
+            alert(`${itemToAdd.name} has been moved to your shopping bag!`);
+            loadFavorites();
+        }
+
+        // Initialize
         loadFavorites();
-    }
-}
-
-function moveToCart(index) {
-    let favorites = JSON.parse(localStorage.getItem('swiftFavorites')) || [];
-    
-    // IMPORTANT: Check your Cart/Order page. 
-    // If that page uses a different name, change 'cart' below to match it.
-    let cart = JSON.parse(localStorage.getItem('cart')) || []; 
-
-    const itemToAdd = favorites[index];
-
-    // Optional: Check if item is already in cart to prevent duplicates
-    const isAlreadyInCart = cart.some(cartItem => cartItem.name === itemToAdd.name);
-    
-    if (!isAlreadyInCart) {
-        cart.push(itemToAdd);
-        localStorage.setItem('cart', JSON.stringify(cart));
-        
-        // Remove from favorites after moving
-        favorites.splice(index, 1);
-        localStorage.setItem('swiftFavorites', JSON.stringify(favorites));
-        
-        alert(`${itemToAdd.name} moved to your order!`);
-    } else {
-        alert("This item is already in your cart!");
-        // Still remove from favorites since it's already in the cart
-        favorites.splice(index, 1);
-        localStorage.setItem('swiftFavorites', JSON.stringify(favorites));
-    }
-
-    loadFavorites();
-}
-
-// Run on page load
-loadFavorites();
     </script>
 </body>
 </html>
